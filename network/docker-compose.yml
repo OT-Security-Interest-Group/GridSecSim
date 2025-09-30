@@ -1,0 +1,29 @@
+services:
+  god_debug:
+    image: alpine:latest
+    container_name: god_debug
+    cap_add:
+      - NET_ADMIN
+    networks:
+      enterprise_network:
+        ipv4_address: 192.168.10.69
+    entrypoint: [ "/bin/sh", "-c", "sleep infinity" ]
+
+  controller:
+    container_name: controller
+    privileged: true
+    build:
+      context: ./routing-controller
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc:/host/proc:ro
+
+networks:
+  enterprise_network:
+    name: enterprise_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24
+          gateway: 192.168.10.250

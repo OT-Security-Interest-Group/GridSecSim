@@ -205,3 +205,25 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+.DS_Store
+# industrial/OpenPLC_v2/
+logging/logs/nginx/
+logging/logs/iptables/
+industrial/db_data
+industrial/db_conf
+industrial/tomcat_log
+
+# industrial/node-red/
+# industrial/node-red/data/.config.nodes.json
+# industrial/node-red/data/.config.runtime.json
+# industrial/node-red/data/.config.runtime.json.backup
+# industrial/node-red/data/.config.users.json
+# industrial/node-red/data/.config.users.json.backup
+
+logging/grafana/*.db
+logging/grafana/plugins
+
+industrial/OpenPLC_v2/
+
