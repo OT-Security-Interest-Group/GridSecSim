@@ -7,6 +7,8 @@ services:
     networks:
       transmission_network:
         ipv4_address: 192.168.10.69
+      distribution_network:
+        ipv4_address: 192.168.20.69
     entrypoint: [ "/bin/sh", "-c", "sleep infinity" ]
 
   controller:

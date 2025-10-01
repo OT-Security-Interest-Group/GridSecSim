@@ -1,5 +1,7 @@
 # GridSecSim
 
+> Note: Make sure you push your changes in your own branch and then make a pull request (PR) to merge into main.
+
 Folder Structure:
 ```
 +---docs
