@@ -5,7 +5,7 @@ services:
     cap_add:
       - NET_ADMIN
     networks:
-      enterprise_network:
+      transmission_network:
         ipv4_address: 192.168.10.69
     entrypoint: [ "/bin/sh", "-c", "sleep infinity" ]
 
@@ -20,10 +20,18 @@ services:
       - /proc:/host/proc:ro
 
 networks:
-  enterprise_network:
-    name: enterprise_network
+  transmission_network:
+    name: transmission_network
     driver: bridge
     ipam:
       config:
         - subnet: 192.168.10.0/24
           gateway: 192.168.10.250
+
+  distribution_network:
+    name: distribution_network
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 192.168.20.0/24
+        gateway: 192.168.20.250

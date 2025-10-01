@@ -1,0 +1,6 @@
+services:
+
+
+networks:
+  transmission_network:
+    external: true
