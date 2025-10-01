@@ -6,6 +6,7 @@ import (
 	"physics_sim/go/pkg/api"
 	"physics_sim/go/pkg/cache"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"google.golang.org/protobuf/proto"
 )
 

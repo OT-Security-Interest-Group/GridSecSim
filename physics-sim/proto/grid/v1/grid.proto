@@ -1,100 +1,41 @@
 syntax = "proto3";
 package grid.v1;
 
+// IMPORTANT: set go_package to match your module path
+option go_package = "module/path/go/pkg/pb/grid/v1;gridv1";
+
 message Clock { uint64 tick = 1; uint64 dt_ms = 2; }
-message Topology { string topo_id = 1; string topo_hash = 2; }
 
 message Envelope {
-  string msg_id = 1;     // uuid
-  string src = 2;        // compId or "physics"
-  string dest = 3;       // optional compId
-  uint64 seq = 4;        // per-sender sequence for dedupe
-  Clock clock = 5;       // sender’s notion
-  Topology topo = 6;
+  string msg_id = 1;
+  string src    = 2;
+  string dest   = 3;
+  uint64 seq    = 4;
+  Clock  clock  = 5;
 }
 
-enum Role { ROLE_SENSOR = 0; ROLE_ACTUATOR = 1; ROLE_HMI = 2; ROLE_OTHER = 3; }
-
-// ---- Handshake / lifecycle ----
-message Hello {
+message SimStatus {
   Envelope env = 1;
-  string comp_id = 2;
-  Role role = 3;
-  string version = 4;
-  repeated string capabilities = 5;   // e.g., "reads:node/bus-7.v", "acts:heater-9.on"
+  string state = 2; // RUNNING|PAUSED|UNKNOWN
 }
 
-message Ack {
-  Envelope env = 1;
-  bool accepted = 2;
-  string reason = 3;
-  uint64 assigned_dt_ms = 4;
-  Topology topo = 5;                 // current topo snapshot meta
-  repeated string initial_interests = 6; // what physics registered for this comp
+message NodeDelta {
+  Envelope env     = 1;
+  string   node_id = 2;
+  // Keep minimal; add fields later.
+  optional double v_pu = 10;
 }
 
-// ---- Intent (interest registration) ----
-message Intent {
-  Envelope env = 1;
-  enum Op { SUBSCRIBE = 0; UNSUBSCRIBE = 1; }
-  Op op = 2;
-  repeated string node_ids = 3;      // nodes the component wants updates for
-  repeated string edge_ids = 4;      // edges it wants updates for
-  repeated string vars = 5;          // optional variable keys
-}
-
-message IntentConfirm {
-  Envelope env = 1;
-  bool ok = 2;
-  string reason = 3;
-}
-
-// ---- Measurements & Commands ----
-message Measurement {
-  Envelope env = 1;
-  string comp_id = 2;
-  string node_id = 3;
-  map<string,double> vars = 4;     // e.g., "temp": 82.4, "p_set_mw": 150
-  uint64 intended_tick = 5;        // “apply at tick”; optional
+message EdgeDelta {
+  Envelope env     = 1;
+  string   edge_id = 2;
+  optional bool breaker_closed = 10;
 }
 
 message Command {
   Envelope env = 1;
-  string comp_id = 2;              // target
-  string type = 3;                 // e.g., "SET_ON", "SET_SETPOINT"
-  map<string,string> args = 4;     // stringly-typed for flexibility
-  uint64 apply_tick = 5;           // physics intends to apply at this tick
-}
-
-message CommandAck {
-  Envelope env = 1;
   string comp_id = 2;
-  string cmd_type = 3;
-  string status = 4;               // "OK"|"ERROR"|"DEFERRED"
-  string error = 5;
-  uint64 applied_tick = 6;
-}
-
-// ---- State deltas ----
-message NodeDelta {
-  Envelope env = 1;
-  string node_id = 2;
-  // Only changed fields present (delta semantics):
-  optional double v_pu = 10;
-  optional double temp_c = 11;
-  optional double p_mw = 12;
-  // add more later; keep optional
-}
-
-message EdgeDelta {
-  Envelope env = 1;
-  string edge_id = 2;
-  optional bool breaker_closed = 10;
-  optional double flow_mw = 11;
-}
-
-// ---- Status ----
-message SimStatus {
-  Envelope env = 1;
-  string state = 2; // RUNNING|PAUSED
+  string type    = 3;
+  map<string,string> args = 4;
+  uint64 apply_tick = 5;
 }
