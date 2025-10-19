@@ -10,7 +10,7 @@ autoinstall:
   identity:
     hostname: otsig-dev-machine
     username: otsig
-    password: $6$2GUgumUxFS0gVZs0$JHL00IeKsYHHgw.784mOGSLncp6k7a2snVulWd2i/oTlrzr065QdO38jr.WHqVerLBYmz6ifM8lnw5NmbitPz1
+    password: "$6$2GUgumUxFS0gVZs0$JHL00IeKsYHHgw.784mOGSLncp6k7a2snVulWd2i/oTlrzr065QdO38jr.WHqVerLBYmz6ifM8lnw5NmbitPz1"
 
   # --- Storage (Automatically use the entire disk) ---
   storage:
@@ -42,26 +42,3 @@ autoinstall:
     
     # 3. Add otsig to the docker group (must be done post-install)
     - 'curtin in-target --target=/target -- usermod -aG docker otsig'
-    
-    # 4. Apply custom .bashrc for the 'otsig' user
-    - 'curtin in-target --target=/target -- sh -c "cat << EOF > /home/otsig/.bashrc'
-# .bashrc for otsig environment
-
-# Source global definitions
-if [ -f \"/etc/bash.bashrc\" ]; then
-    . /etc/bash.bashrc
-fi
-
-# User-specific aliases and functions
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-alias docker-clean='docker system prune -a'
-
-# Custom welcome message
-echo "Welcome to the custom otsig dev environment!"
-EOF"'
-    
-    # 5. Ensure correct ownership of the new .bashrc file
-    - 'curtin in-target --target=/target -- chown otsig:otsig /home/otsig/.bashrc'
-
