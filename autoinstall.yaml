@@ -32,22 +32,32 @@ autoinstall:
 
   # --- Shell Commands (Including VS Code Setup and .bashrc) ---
   late-commands:
-    # 1. Install VS Code Repository Key and Source
-    - 'wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | curtin in-target --target=/target -- tee /usr/share/keyrings/packages.microsoft.gpg > /dev/null'
-    - 'curtin in-target --target=/target -- sh -c "echo \"deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main\" > /etc/apt/sources.list.d/vscode.list"'
+    # --- New and Corrected VS Code Setup ---
+
+    # 1. Download and DEARMOR the Microsoft GPG key to a temporary file in the target system.
+    # We use 'sh -c' to combine the commands and run them robustly in the target environment.
+    - 'curtin in-target --target=/target -- sh -c "curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg"'
     
-    # 2. Install the 'code' package
+    # 2. Move the key to the trusted keyrings location.
+    - 'curtin in-target --target=/target -- install -D -o root -g root -m 644 /tmp/microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg'
+    
+    # 3. Add the VS Code repository source list, referencing the new keyrings location.
+    - 'curtin in-target --target=/target -- sh -c "echo \"deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main\" > /etc/apt/sources.list.d/vscode.list"'
+    
+    # 4. Update the package cache. This step failed before, but should work now.
     - 'curtin in-target --target=/target -- apt update'
+    
+    # 5. Install the 'code' package
     - 'curtin in-target --target=/target -- apt install -y code'
     
-    # 3. Add otsig to the docker group
+    # --- Remaining Commands (Unchanged) ---
+    
+    # 6. Add otsig to the docker group
     - 'curtin in-target --target=/target -- usermod -aG docker otsig'
     
-    # --- Simplified .bashrc modification (single line append) ---
-    # This appends a simple welcome message to the user's .bashrc 
-    # instead of trying to overwrite or complexly define it.
+    # 7. Simplified .bashrc modification (single line append)
     - 'curtin in-target --target=/target -- sh -c "echo -e \"\\n# Custom welcome message\\necho \\\"Welcome to the custom otsig dev environment!\\\"\" >> /home/otsig/.bashrc"'
     
-    # 5. Ensure correct ownership of the new .bashrc file (still important)
+    # 8. Ensure correct ownership of the new .bashrc file
     - 'curtin in-target --target=/target -- chown otsig:otsig /home/otsig/.bashrc'
 
