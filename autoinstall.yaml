@@ -24,15 +24,15 @@ autoinstall:
     - git
     - python3
     - wireshark
-    # No longer need APT setup tools (curl, wget, gpg)
+    # Packages needed for robustness/dependencies
     - software-properties-common 
     - apt-transport-https
 
   # --- Shell Commands (Including VS Code Setup via SNAP) ---
   late-commands:
-    # 1. Install VS Code via SNAP (Works reliably on ARM64/AArch64 systems)
-    # The --classic flag is needed for VS Code to access system files.
-    - 'curtin in-target --target=/target -- snap install code --classic'
+    # 1. Install VS Code via SNAP using the 'edge' channel for ARM64 availability.
+    # The '|| true' ensures that if the snap install fails, the overall autoinstall script continues.
+    - 'curtin in-target --target=/target -- sh -c "snap install code --classic --channel=edge || true"'
     
     # 2. Add otsig to the docker group
     - 'curtin in-target --target=/target -- usermod -aG docker otsig'
