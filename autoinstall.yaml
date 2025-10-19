@@ -11,7 +11,7 @@ autoinstall:
     hostname: otsig-dev-machine
     username: otsig
     # IMPORTANT: Generate this hash using 'openssl passwd -6 otsig' on a Linux system
-    password: <PASTE_YOUR_HASHED_PASSWORD_HERE> 
+    password: $6$2GUgumUxFS0gVZs0$JHL00IeKsYHHgw.784mOGSLncp6k7a2snVulWd2i/oTlrzr065QdO38jr.WHqVerLBYmz6ifM8lnw5NmbitPz1
 
   # --- Storage (Automatically use the entire disk) ---
   storage:
