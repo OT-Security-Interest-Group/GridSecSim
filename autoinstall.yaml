@@ -10,7 +10,6 @@ autoinstall:
   identity:
     hostname: otsig-dev-machine
     username: otsig
-    # IMPORTANT: Generate this hash using 'openssl passwd -6 otsig' on a Linux system
     password: $6$2GUgumUxFS0gVZs0$JHL00IeKsYHHgw.784mOGSLncp6k7a2snVulWd2i/oTlrzr065QdO38jr.WHqVerLBYmz6ifM8lnw5NmbitPz1
 
   # --- Storage (Automatically use the entire disk) ---
@@ -45,7 +44,7 @@ autoinstall:
     - 'curtin in-target --target=/target -- usermod -aG docker otsig'
     
     # 4. Apply custom .bashrc for the 'otsig' user
-    - 'curtin in-target --target=/target -- sh -c "cat << EOF > /home/otsig/.bashrc
+    - 'curtin in-target --target=/target -- sh -c "cat << EOF > /home/otsig/.bashrc'
 # .bashrc for otsig environment
 
 # Source global definitions
