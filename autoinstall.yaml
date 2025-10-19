@@ -28,18 +28,29 @@ autoinstall:
     - software-properties-common 
     - apt-transport-https
 
-  # --- Shell Commands (Including VS Code Setup via SNAP) ---
+  # --- Shell Commands (Only VS Code) ---
   late-commands:
     # 1. Install VS Code via SNAP using the 'edge' channel for ARM64 availability.
     # The '|| true' ensures that if the snap install fails, the overall autoinstall script continues.
     - 'curtin in-target --target=/target -- sh -c "snap install code --classic --channel=edge || true"'
     
-    # 2. Add otsig to the docker group
-    - 'curtin in-target --target=/target -- usermod -aG docker otsig'
-    
-    # 3. Simplified .bashrc modification (single line append)
-    - 'curtin in-target --target=/target -- sh -c "echo -e \"\\n# Custom welcome message\\necho \\\"Welcome to the custom otsig dev environment!\\\"\" >> /home/otsig/.bashrc"'
-    
-    # 4. Ensure correct ownership of the new .bashrc file
-    - 'curtin in-target --target=/target -- chown otsig:otsig /home/otsig/.bashrc'
+  # --- User-Data Section for Post-Creation Setup ---
+  # This section runs via cloud-init *after* the 'otsig' user is guaranteed to exist.
+  user-data:
+    runcmd:
+      # 1. Add otsig to the docker group
+      - usermod -aG docker otsig
+      
+      # 2. Simplified .bashrc modification (single line append)
+      - sh -c "echo -e \"\n# Custom welcome message\necho \"Welcome to the custom otsig dev environment!\"\" >> /home/otsig/.bashrc"
+      
+      # 3. Ensure correct ownership of the new .bashrc file
+      - chown otsig:otsig /home/otsig/.bashrc
+
+  # --- Reboot Command ---
+  # Ensures the system reboots cleanly after installation is finalized
+  power-state:
+    delay: 0
+    mode: reboot
+    timeout: 30
 
