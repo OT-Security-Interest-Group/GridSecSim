@@ -11,55 +11,35 @@ autoinstall:
     hostname: otsig-dev-machine
     username: otsig
     password: $6$2GUgumUxFS0gVZs0$JHL00IeKsYHHgw.784mOGSLncp6k7a2snVulWd2i/oTlrzr065QdO38jr.WHqVerLBYmz6ifM8lnw5NmbitPz1
-
   # --- Storage (Automatically use the entire disk) ---
   storage:
     layout:
       name: automatic
       match: {}
   
-  # --- Packages to Install ---
+  # --- Packages to Install (Cleaned up list) ---
   packages:
     - docker.io
     - openssh-server
     - git
     - python3
     - wireshark
-    # Added curl to the list to ensure it's installed
-    - curl
-    - wget
-    - gpg
-    - software-properties-common
+    # No longer need APT setup tools (curl, wget, gpg)
+    - software-properties-common 
     - apt-transport-https
 
-  # --- Shell Commands (Including VS Code Setup and .bashrc) ---
+  # --- Shell Commands (Including VS Code Setup via SNAP) ---
   late-commands:
-    # 0. Preliminary Update: Ensures all package lists and newly installed tools (like curl) are ready.
-    - 'curtin in-target --target=/target -- apt update'
-
-    # 1. Download and DEARMOR the Microsoft GPG key to a temporary file in the target system.
-    - 'curtin in-target --target=/target -- sh -c "curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg"'
+    # 1. Install VS Code via SNAP (Works reliably on ARM64/AArch64 systems)
+    # The --classic flag is needed for VS Code to access system files.
+    - 'curtin in-target --target=/target -- snap install code --classic'
     
-    # 2. Move the key to the trusted keyrings location.
-    - 'curtin in-target --target=/target -- install -D -o root -g root -m 644 /tmp/microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg'
-    
-    # 3. Add the VS Code repository source list, referencing the new keyrings location.
-    - 'curtin in-target --target=/target -- sh -c "echo \"deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main\" > /etc/apt/sources.list.d/vscode.list"'
-    
-    # 4. Update the package cache. This is the update that failed before.
-    - 'curtin in-target --target=/target -- apt update'
-    
-    # 5. Install the 'code' package
-    - 'curtin in-target --target=/target -- apt install -y code'
-    
-    # --- Remaining Commands ---
-    
-    # 6. Add otsig to the docker group
+    # 2. Add otsig to the docker group
     - 'curtin in-target --target=/target -- usermod -aG docker otsig'
     
-    # 7. Simplified .bashrc modification (single line append)
+    # 3. Simplified .bashrc modification (single line append)
     - 'curtin in-target --target=/target -- sh -c "echo -e \"\\n# Custom welcome message\\necho \\\"Welcome to the custom otsig dev environment!\\\"\" >> /home/otsig/.bashrc"'
     
-    # 8. Ensure correct ownership of the new .bashrc file
+    # 4. Ensure correct ownership of the new .bashrc file
     - 'curtin in-target --target=/target -- chown otsig:otsig /home/otsig/.bashrc'
 
