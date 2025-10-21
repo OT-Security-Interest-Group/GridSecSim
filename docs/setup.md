@@ -1,19 +1,18 @@
 This doc will guide you through the process of getting started with GridSecSim. The setup is meant to be minimal and clear to follow, so you can get started on OT security as quickly as possible.
 #### Table of Contents
-- [[#Environment Setup]]
-- [[#Working with git]]
-- [[#Working with Docker]]
-- [[#Our Tooling]]
-- [[#Standards we are using]]
-- [[#Where to find information]]
+- [Environment Setup](#environment)
+- [Working with git](#git)
+- [Working with docker](#docker)
+- [Using our Tools](#tooling)
 
+<a id="environment"></a>
 # Environment Setup
 This will lead you through installing Docker if you don't have it. It will also have instructions for installing other tools, such as `git`, and 
 ## Windows
 ### Docker
 1. Go to Docker Desktop install docs and pick the architecture you are on [Link](https://docs.docker.com/desktop/setup/install/windows-install/)
 
-![[install-docker-windows.png]]
+[install-docker-windows.png]
 
 2. While that is installing, check if you have WSL installed by running wsl --version in CMD or PowerShell. You need `wsl` version 2.1.5 or higher. Skip to step 5 if you have the right version
 
@@ -60,7 +59,7 @@ If you don't have `git` installed use homebrew to install
 ```sh
 brew install git
 ```
-
+<a id="git"></a>
 # Working with git
 `git` is a version control system that allows you to keep track of work. We are using GitHub as the project's remote repository. If you know nothing about `git`, then watch this [video](https://www.youtube.com/watch?v=hwP7WQkmECE) that covers the very basics.
 ## Git commands
@@ -143,6 +142,7 @@ git push origin --delete <branch-name>
 ## How do we use it
 We use `git` with loose feature-branching workflows, where you create a branch for a feature you're working on and then merge it back in relatively quickly. We don't have a dev branch or anything like that.
 
+<a id="docker"></a>
 # Working with Docker
 **Docker** is a platform that uses operating-system-level virtualization to deliver software in standardized units called **containers**. It essentially packages an application and all its dependencies—code, runtime, libraries, and settings—into one isolated environment, ensuring the application runs consistently regardless of the host machine.
 
@@ -227,6 +227,8 @@ docker compose -f <path-to-file> down
 ```
 
 > **NOTE**: We have command line tools to make this process easier or you can use docker desktop but this is the default docker workflow you might do if you are going through making a change to one container.
+
+<a id="tooling"></a>
 # Our Tooling
 To make the development process easier there are several scripts that we have created in order to make the development process faster. 
 
