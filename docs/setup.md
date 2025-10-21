@@ -87,4 +87,4 @@ This is a container within the network Docker Compose that allows us to use cust
 It will listen on the Docker socket for any container start events. When it hears them, it will exec into the container and attempt to change the default route to what we want (our routers). 
 
 # Where to go next
-Now that you have your environment setup and you know about
+Now that you have your environment setup go to [getting_started](./getting_started.md) to learn how to use everything.

@@ -6,9 +6,7 @@ Follow the steps below to get the system running and then explore the supporting
 ---
 
 ## 1. Prerequisites
-Installed
-- **Docker** must be installed on your system. Installation instructions: [setup](./setup.md)  
-- **Git** must also be installed. Installation instructions: [setup](./setup.md)
+**Docker** and **Git** have to be installed on your system inorder to work on this project. For install instructions go here: [setup](./setup.md)
 
 ---
 
