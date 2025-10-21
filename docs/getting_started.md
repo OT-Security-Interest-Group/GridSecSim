@@ -1,62 +1,80 @@
 # Getting Started
 
-This project uses **Docker** to simulate an Operational Technology (OT) environment.  
-Follow the steps below to get the system running and then explore the supporting documentation for more details.  
+This project uses **Docker** to simulate an Operational Technology (OT) environment.
+Follow the steps below to get the system running and then explore the supporting documentation for more details.
 
 ---
 
 ## 1. Prerequisites
-
-- **Docker** must be installed on your system.  
-  Installation instructions: [Get Docker](https://docs.docker.com/get-docker/)  
-
-- Basic command-line knowledge is assumed.  
-
-If you are new to Docker or container concepts, see the [Docker Reference](./docker.md) for a quick overview and commonly used commands.  
+Installed
+- **Docker** must be installed on your system. Installation instructions: [setup](./setup.md)  
+- **Git** must also be installed. Installation instructions: [setup](./setup.md)
 
 ---
 
-## 2. Starting the System
+## 2. Getting to know the tools
+To learn more about the tools used in this repository go to each of these docs
+- [docker](./docker.md)
+- [git](./git.md)
+- [scripts](./scripts.md)
+- [custom docker networking](./network/routers.md)
 
-The easiest way to start the environment is by using the helper scripts provided.  
-Refer to [scripts.md](./scripts.md) for details on each script and how they should be executed.  
+## 3. Starting the System
+
+The easiest way to start the environment is by using the helper scripts provided.
+Refer to [scripts.md](./scripts.md) for details on each script and how they should be executed.
 
 ### Recommended: Using Scripts
-Run either `testing.sh` or `tools.sh` depending on your workflow.  
-These scripts handle the setup steps automatically, including starting the network.  
+Run either `testing.sh` or `tools.sh` depending on your workflow.
+These scripts handle the setup steps automatically, including starting the network.
+
+```sh
+# Setup
+source tools.sh
+
+# Start
+start -u
+# or
+start -u <service>
+
+# Stop
+stop -d
+# or
+stop -s <service>
+```
 
 ### Manual: Using Docker Compose
-If you prefer to start the system manually:  
+If you prefer to start the system manually:
 
-1. **Spin up the network stack first** (this creates the necessary Docker networks and routing between containers):  
+1. **Spin up the network stack first** (this creates the necessary Docker networks and routing between containers):
    `docker compose -f network/docker-compose.yml up -d`  
 
    > If you use the provided scripts, this step is already done for you.  
 
-2. **Start the rest of the environment** by running the appropriate compose files for the services you need:  
+2. **Start the rest of the environment** by running the appropriate compose files for the services you need:
    `docker compose -f <path-to-compose-file> up -d`  
 
 ---
 
-## 3. Networking
+## 4. Networking
 
 The environment relies on a dedicated Docker Compose file under the `network/` folder.  
-This compose file:  
-- Creates the Docker networks used by the system.  
-- Sets up routing between containers.  
-- Ensures connectivity across services.  
+This compose file:
+- Creates the Docker networks used by the system.
+- Sets up routing between containers.
+- Ensures connectivity across services.
 
 This step is required unless the networks have already been created on your system.  
 See the [networking documentation](./network/routers.md) for a deeper explanation of how the virtual networks operate.  
 
 ---
 
-## 4. Troubleshooting
+## 5. Troubleshooting
 
 If you run into issues:  
 
 - **Clean up unused resources**  
-  `docker system prune`  
+  `docker system prune -af`  
 
 - **Restart Docker**  
   Restarting the Docker service often resolves environment issues.  
@@ -73,9 +91,8 @@ If you run into issues:
 
 ## 5. Next Steps
 
-- Learn about common Docker commands: [docker.md](./docker.md)  
+- Make sure to learn about common Docker commands: [docker.md](./docker.md)  
 - Understand how the helper scripts work: [scripts.md](./scripts.md)  
 - Explore the network setup: [networking.md](./network/routers.md)  
 
 Make sure to read through the rest of the documentation for a complete understanding of how the environment is structured and how to extend it.  
-

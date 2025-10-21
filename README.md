@@ -1,4 +1,6 @@
 # GridSecSim
+Well come to GridSecSim an OT component simulation using docker.
+- Go here to get started: [doc](./docs/getting_started.md)
 
 > Note: Make sure you push your changes in your own branch and then make a pull request (PR) to merge into main.
 
