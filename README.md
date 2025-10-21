@@ -5,10 +5,7 @@
 Folder Structure:
 ```
 +---docs
-|   |   docker.md
-|   |   getting_started.md
-|   |   scripts.md
-|   |   WORKFLOWS.md
+|   |   bunch of documentation
 |   |
 |   \---network
 |           routers.md
