@@ -1,7 +1,7 @@
 This doc will guide you through the process of getting started with GridSecSim. The setup is meant to be minimal and clear to follow, so you can get started on OT security as quickly as possible.
 #### Table of Contents
 - [Environment Setup](#environment)
-- [Working with git](#git)
+- [Working with git](#git1)
 - [Working with docker](#docker1)
 - [Using our Tools](#tooling)
 
@@ -59,7 +59,7 @@ If you don't have `git` installed use homebrew to install
 ```sh
 brew install git
 ```
-<a id="git"></a>
+<a id="git1"></a>
 # Working with git
 `git` is a version control system that allows you to keep track of work. We are using GitHub as the project's remote repository. If you know nothing about `git`, then watch this [video](https://www.youtube.com/watch?v=hwP7WQkmECE) that covers the very basics.
 ## Git commands
