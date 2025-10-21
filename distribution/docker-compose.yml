@@ -1,5 +1,0 @@
-services:
-
-networks:
-  distribution_network:
-    external: true
