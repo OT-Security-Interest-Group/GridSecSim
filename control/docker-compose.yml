@@ -1,0 +1,67 @@
+services:
+
+  scadalts:
+    image: scadalts/scadalts:latest
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - CATALINA_OPTS=-Xmx2G -Xms2G
+      - JAVA_OPTS=-Dlogback.configurationFile=/usr/local/tomcat/lib/logback.xml 
+    ports:
+      - "0.0.0.0:8082:8080"
+    depends_on:
+      - database
+    expose: [ "8080" ]
+    volumes:
+      - ./tomcat_log:/usr/local/tomcat/logs:rw
+      - ./scada/logback.xml:/usr/local/tomcat/lib/logback.xml:rw
+      - scada_databases:/var/lib/mysql
+      - ./scada/base_scada_data.json:/usr/local/tomcat/conf/base_scada_data.json:rw
+    links:
+      - database:database
+    command:
+      - /usr/bin/wait-for-it
+      - --host=database
+      - --port=3306
+      - --timeout=30
+      - --strict
+      - --
+      - /usr/local/tomcat/bin/catalina.sh
+      - run
+
+  database:
+    container_name: mysql_database
+    image: mysql/mysql-server:8.0.32
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "0.0.0.0:3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=scadalts
+    expose: [ "3307" ]
+    # volumes:
+    #   - ./db_data:/var/lib/mysql:rw
+    #   - ./db_conf:/etc/mysql:ro
+    command: --log_bin_trust_function_creators=1
+
+  hmi:
+    build:
+      context: ./hmi
+      dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
+    entrypoint: [ "gunicorn", "app:app", "-b", "0.0.0.0:5000" ]
+    container_name: hmi
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+      - "5005:5000"
+
+volumes:
+  scada_databases:

@@ -227,3 +227,6 @@ logging/grafana/plugins
 
 industrial/OpenPLC_v2/
 
+control/db_data
+control/db_conf
+control/tomcat_log
