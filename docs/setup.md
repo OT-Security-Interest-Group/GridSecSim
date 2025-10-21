@@ -2,7 +2,7 @@ This doc will guide you through the process of getting started with GridSecSim. 
 #### Table of Contents
 - [Environment Setup](#environment)
 - [Working with git](#git)
-- [Working with docker](#docker)
+- [Working with docker](#docker1)
 - [Using our Tools](#tooling)
 
 <a id="environment"></a>
@@ -142,7 +142,7 @@ git push origin --delete <branch-name>
 ## How do we use it
 We use `git` with loose feature-branching workflows, where you create a branch for a feature you're working on and then merge it back in relatively quickly. We don't have a dev branch or anything like that.
 
-<a id="docker"></a>
+<a id="docker1"></a>
 # Working with Docker
 **Docker** is a platform that uses operating-system-level virtualization to deliver software in standardized units called **containers**. It essentially packages an application and all its dependencies—code, runtime, libraries, and settings—into one isolated environment, ensuring the application runs consistently regardless of the host machine.
 
