@@ -2,7 +2,6 @@ from flask import Flask, render_template, current_app
 from pymodbus.client import ModbusTcpClient
 from datetime import datetime
 from flask import jsonify
-import requests, os
 import secrets
 
 
