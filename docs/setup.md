@@ -12,7 +12,7 @@ This will lead you through installing Docker if you don't have it. It will also 
 ### Docker
 1. Go to Docker Desktop install docs and pick the architecture you are on [Link](https://docs.docker.com/desktop/setup/install/windows-install/)
 
-[install-docker-windows.png]
+![install-docker-windows.png](install-docker-windows.png)
 
 2. While that is installing, check if you have WSL installed by running wsl --version in CMD or PowerShell. You need `wsl` version 2.1.5 or higher. Skip to step 5 if you have the right version
 
@@ -48,7 +48,7 @@ If you don't already have git installed, go here [Link](https://git-scm.com/inst
 ### Docker
 1. Go to Docker Desktop install docs and pick the type of chip you have [Link](https://docs.docker.com/desktop/setup/install/mac-install/)
 
-![[install-docker-mac.png]]
+![install-docker-mac.png](install-docker-mac.png)
 
 
 2. Once downloaded, double-click on the dmg file to finish the installation.
