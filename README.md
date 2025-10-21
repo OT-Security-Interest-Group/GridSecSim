@@ -13,11 +13,14 @@ Folder Structure:
 |   \---network
 |           routers.md
 |
-+---distribution
++---enterprise
 |       docker-compose.yml
 +---network
 |       docker-compose.yml
 |
-\---transmission
-        docker-compose.yml
+\---control
+|   |   docker-compose.yml
+|   |
+|   \---scada
+|   \---hmi
 ```
