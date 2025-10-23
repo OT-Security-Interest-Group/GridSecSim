@@ -9,7 +9,7 @@ It will create a .txt file `services.txt` that will store all the services and c
 
 
 # tools.sh
-This script is the latest script that will help with working on this project.
+This script is the latest script that will help with working on this project. It's main purpose is to speed up the development process when turning on and off containers.
 
 ## Requirements
 - Bash 4 or higher for bash dicts.
@@ -17,12 +17,40 @@ This script is the latest script that will help with working on this project.
 
 ## How to use
 - Navigate to the root of the repository
-- `source tools.sh`
+- `source tools.sh` -- you need to do this in every shell you open
 - Now you can use the command line tools `start` and `stop`
 - Run `-h` on either to get full list of command options
 
 ## Overview
 This script when sourced runs `get_services.sh` to update the services.txt file. Then it creates a autocomplete from that file that you can use to quickly select an compose or container quickly. Once you source the script you can run the start and stop commands from anywhere in your system on the same shell and it will work.
+
+## Features
+- Tab Auto Complete for container names
+- dstart -- Start containers
+- dstop -- Stop containers
+- dlist -- List containers
+
+### dstart
+This function spins up or builds each of the specified containers or all of them. 
+- **-u**: This spins up all of the containers
+- **-b**: This will build the specified containers and then turn them on
+
+```sh
+dstart -u <service> <service> <compose> -b <service>
+```
+
+> [!NOTE]: you can define either the compose file or the specific service within the file.
+
+### dstop
+This function stops or compose downs the specified containers
+- **-s**: This stops the specified containers
+- **-d**: This compose downs the specified containers
+
+### dlist
+This function formats the output of docker ps
+- **-a**: This lists all containers running or not
+- **-f**: Lists full untrunkated IDs and stuff
+
 
 # testing.sh
 ## Requirements

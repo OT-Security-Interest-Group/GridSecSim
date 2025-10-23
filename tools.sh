@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+# get_services() {
+#     output_file="services.txt"
+#     > "$output_file"
+#
+#     find . -type f -name "docker-compose.yml" | while read -r file; do
+#       echo "$file" >> "$output_file"
+#       yq eval '.services | keys' "$file" | grep -v '^#' | sed 's/^..//' | grep -v '^$' >> "$output_file"
+#     done
+#
+#     echo "Service names have been written to $output_file"
+# }
+
+
 # Function to read the file and build the map
 build_compose_map() {
     local compose_file=""
@@ -22,10 +35,9 @@ build_compose_map() {
     done < "$services_file"
 }
 
-start() {
+dstart() {
     local build_list=()
     local start_list=()
-docker compose -f ${SCRIPT_DIR}network/docker-compose.yml up -d god_debug
     while [[ $# -gt 0 ]]; do
         case "$1" in
             -b)
@@ -35,14 +47,21 @@ docker compose -f ${SCRIPT_DIR}network/docker-compose.yml up -d god_debug
                     shift
                 done
 
+                docker compose -f ${SCRIPT_DIR}network/docker-compose.yml up -d god_debug
+
+                # If they do `-d` with no options it will do it to all of them here and break
                 if [[ ${#build_list[@]} -eq 0 ]]; then
                     for arg in $compose_list; do
                         docker compose -f $arg build --no-cache
                         docker compose -f $arg up -d
                     done
                     break
-                fi  
+                fi
+
+                # Turn on specified services
                 for arg in $build_list; do
+
+                    # This is if the input is a compose file or a service
                     if [[ ${compose_list[@]} =~ $arg ]] then
                         docker compose -f $arg build --no-cache
                         docker compose -f $arg up -d
@@ -59,41 +78,44 @@ docker compose -f ${SCRIPT_DIR}network/docker-compose.yml up -d god_debug
                     shift
                 done
 
+                docker compose -f ${SCRIPT_DIR}network/docker-compose.yml up -d god_debug
+
+                # No specific service so all of them
                 if [[ ${#start_list[@]} -eq 0 ]]; then
                     for arg in $compose_list; do
                         docker compose -f $arg up -d
                     done
                     break
                 fi  
+
+                # Loading specific service
                 for arg in $start_list; do
                     if [[ ${compose_list[@]} =~ $arg ]] then
-                        # docker compose -f "$arg" up -d
                         docker compose -f $arg up -d
                     else
-                        # docker compose -f "${service_to_compose["$arg"]}" up -d "$arg"
                         docker compose -f ${service_to_compose["$arg"]} up -d $arg
                     fi
                 done
                 ;;
             -h)
                 shift
-                echo "Usage: start [OPTIONS] [SERVICES...]"
+                echo "Usage: dstart [OPTIONS] [SERVICES...]"
                 echo ""
                 echo "Options:"
                 echo "  -b    Build specified services or all services if none are provided."
-                echo "        Usage: start -b [service1] [service2] ..."
+                echo "        Usage: dstart -b [service1] [service2] ..."
                 echo "        If no services are specified, builds all services listed in the compose files."
                 echo ""
                 echo "  -u    Start specified services or all services if none are provided."
-                echo "        Usage: start -u [service1] [service2] ..."
+                echo "        Usage: dstart -u [service1] [service2] ..."
                 echo "        If no services are specified, starts all services listed in the compose files."
                 echo ""
                 echo "  -h    Display this help message."
                 echo ""
                 echo "Examples:"
-                echo "  start -b service1 service2    Build and start the specified services."
-                echo "  start -u service1 service2    Start the specified services without rebuilding."
-                echo "  start -h                      Display this help message."
+                echo "  dstart -b <service1> <service2>    Build and start the specified services."
+                echo "  dstart -u <service1> <service2>    Start the specified services without rebuilding."
+                echo "  dstart -h                          Display this help message."
                 ;;
 
             *)
@@ -106,7 +128,7 @@ docker compose -f ${SCRIPT_DIR}network/docker-compose.yml up -d god_debug
     done
 }
 
-stop() {
+dstop() {
     local stop_list=()
     local down_list=()
 
@@ -156,22 +178,57 @@ stop() {
 
             -h)
                 shift
-                echo "Usage: stop_containers [-s container1 container2 ...] [-d container1 container2 ...]"
+                echo "Usage: dstop [-s container1 container2 ...] [-d container1 container2 ...]"
                 echo "  -s       Stop specified containers. If no containers are provided, stops all running containers."
                 echo "  -d       Compose down specified containers. If no containers are provided, composes down all services."
                 echo "  -h       Show this help message."
                 echo
                 echo "Examples:"
-                echo "  stop_containers -s web-app db-server      # Stops web-app and db-server containers."
-                echo "  stop_containers -d                        # Composes down all services."
-                echo "  stop_containers -s web-app -d db-server    # Stops web-app and composes down db-server."
+                echo "  dstop -s web-app db-server      # Stops web-app and db-server containers."
+                echo "  dstop -d                        # Composes down all services."
+                echo "  dstop -s web-app -d db-server    # Stops web-app and composes down db-server."
                 ;;
 
             *)
+                echo "$1 that isn't an option"
                 break
                 ;;
         esac
     done
+}
+
+dlist() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -a)
+                shift
+                docker ps -a --format "table {{.Names}}\t{{.ID}}\t{{.Status}}"
+                return
+                ;;
+            -f)
+                shift
+                docker ps --format "table {{.Names}}\t{{.ID}}\t{{.Status}}" --no-trunc
+                return
+                ;;
+            -h)
+                shift
+                echo "Usage: list out running docker containers, all docker containers, and without truncation"
+                echo "-a    This lists all the containers on the system"
+                echo "-f    Doesn't truncate the ID or any of the other information"
+                echo "Examples:"
+                echo "  dlist       # Lists all running containers"
+                echo "  dlist -a    # Lists all containers on system"
+                echo "  dlist -f    # Does full output without any truncation"
+                ;;
+            *)
+                shift
+                echo "$1 that isn't an option"
+                echo "-a or -f"
+                return 
+                ;;
+        esac
+    done
+    docker ps --format "table {{.Names}}\t{{.ID}}\t{{.Status}}"
 }
 
 #TODO: Add a grouping feat that allows you to create a group and then call that name instead of all the names inside of it. Would be done with a dict using formatting for dict of list. Then save this to a file so others can use the grouping.
@@ -190,6 +247,8 @@ declare -A service_to_compose
 complete_list=()
 compose_list=()
 service_list=()
+
+# get_services
 
 # Enable running script from anywhere
 SCRIPT_DIR="$(pwd)/"
