@@ -33,6 +33,37 @@ build_compose_map() {
             service_to_compose["$line"]="$compose_file"
         fi
     done < "$services_file"
+
+    if [[ -f "$config_file" ]]; then
+
+        local group_names=()
+        while IFS= read -r line; do
+            group_names+=("$line")
+        done <<< "$(yq e '.groups | keys | .[]' "$config_file")"
+
+        for group_name in $group_names; do
+            local services=$(yq e ".groups.\"frontend\"[]" "$config_file")
+
+            local service_list_csv=""
+            while IFS= read -r service; do
+                if [[ -z "$service_list_csv" ]]; then
+                    service_list_csv="$service"
+                else
+                    service_list_csv+=", $service"
+                fi
+            done <<< "$services"
+
+            #TODO: Find out why both groups are keeping the same values and not getting updated correctly
+            echo "group:$group_name = $service_list_csv"
+
+            custom_groups["group:$group_name"]="$service_list_csv"
+            complete_list+=("group:$group_name")
+            echo "Loaded group: group:$group_name"
+        done
+    else
+        echo "Warning: Configuration file not found at $config_file"
+    fi
+
 }
 
 dstart() {
@@ -43,9 +74,24 @@ dstart() {
             -b)
                 shift
                 while [[ $# -gt 0 && $1 != -* ]]; do
-                    build_list+=("$1")
+
+                    # Check to see if the input is a group
+                    local check="${custom_groups["$1"]}" #TODO: Find out why -v wasn't working in the if
+                    if [[ ${#check} -gt 1 ]]; then
+                        local add_services=$(_csv_to_array "${custom_groups["$1"]}")
+                        for services in $add_services; do
+                            build_list+=("$services")
+                        done
+                    else
+                        build_list+=("$1")
+                    fi
                     shift
                 done
+
+                for i in $build_list; do
+                    echo "$i"
+                done
+                return
 
                 docker compose -f ${SCRIPT_DIR}network/docker-compose.yml up -d god_debug
 
@@ -231,7 +277,18 @@ dlist() {
     docker ps --format "table {{.Names}}\t{{.ID}}\t{{.Status}}"
 }
 
-#TODO: Add a grouping feat that allows you to create a group and then call that name instead of all the names inside of it. Would be done with a dict using formatting for dict of list. Then save this to a file so others can use the grouping.
+_csv_to_array() {
+    local csv_string="$1"
+
+    echo "$csv_string" | tr ',' '\n' | while IFS= read -r element; do
+        local trimmed_element=$(echo "$element" | xargs)
+
+        # Only output non-empty elements
+        if [[ -n "$trimmed_element" ]]; then
+            echo "$trimmed_element"
+        fi
+    done
+}
 
 # Autocomplete Function
 _containers() {
@@ -244,6 +301,7 @@ _containers() {
 
 # Global associative array to map compose files to services
 declare -A service_to_compose
+declare -A custom_groups
 complete_list=()
 compose_list=()
 service_list=()
@@ -252,11 +310,13 @@ service_list=()
 
 # Enable running script from anywhere
 SCRIPT_DIR="$(pwd)/"
+
 # Path to the file containing the compose files and container names
-services_file="${SCRIPT_DIR}services.txt"
+services_file="${SCRIPT_DIR}scripts-config/services.txt"
+config_file="${SCRIPT_DIR}scripts-config/tools.yaml"
 build_compose_map
 
 # Set up autocompletion 
-complete -F _containers start
-complete -F _containers stop
+complete -F _containers dstart
+complete -F _containers dstop
 
