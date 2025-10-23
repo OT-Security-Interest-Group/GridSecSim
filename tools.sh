@@ -34,6 +34,7 @@ build_compose_map() {
         fi
     done < "$services_file"
 
+    # NOTE: This loads in custom groups
     if [[ -f "$config_file" ]]; then
 
         local group_names=()
@@ -42,7 +43,7 @@ build_compose_map() {
         done <<< "$(yq e '.groups | keys | .[]' "$config_file")"
 
         for group_name in $group_names; do
-            local services=$(yq e ".groups.\"frontend\"[]" "$config_file")
+            local services=$(yq e ".groups.\"$group_name\"[]" "$config_file")
 
             local service_list_csv=""
             while IFS= read -r service; do
@@ -53,8 +54,7 @@ build_compose_map() {
                 fi
             done <<< "$services"
 
-            #TODO: Find out why both groups are keeping the same values and not getting updated correctly
-            echo "group:$group_name = $service_list_csv"
+            # echo "group:$group_name = $service_list_csv"
 
             custom_groups["group:$group_name"]="$service_list_csv"
             complete_list+=("group:$group_name")
