@@ -74,9 +74,10 @@ dstart() {
             -b)
                 shift
                 while [[ $# -gt 0 && $1 != -* ]]; do
+                    #TODO: Find out why -v wasn't working in the if
 
                     # Check to see if the input is a group
-                    local check="${custom_groups["$1"]}" #TODO: Find out why -v wasn't working in the if
+                    local check="${custom_groups["$1"]}"
                     if [[ ${#check} -gt 1 ]]; then
                         local add_services=$(_csv_to_array "${custom_groups["$1"]}")
                         for services in $add_services; do
@@ -87,11 +88,6 @@ dstart() {
                     fi
                     shift
                 done
-
-                for i in $build_list; do
-                    echo "$i"
-                done
-                return
 
                 docker compose -f ${SCRIPT_DIR}network/docker-compose.yml up -d god_debug
 
@@ -120,7 +116,16 @@ dstart() {
             -u)
                 shift
                 while [[ $# -gt 0 && $1 != -* ]]; do
-                    start_list+=("$1")
+                    # Check to see if the input is a group
+                    local check="${custom_groups["$1"]}"
+                    if [[ ${#check} -gt 1 ]]; then
+                        local add_services=$(_csv_to_array "${custom_groups["$1"]}")
+                        for services in $add_services; do
+                            start_list+=("$services")
+                        done
+                    else
+                        start_list+=("$1")
+                    fi
                     shift
                 done
 
@@ -183,9 +188,19 @@ dstop() {
             -s)
                 shift
                 while [[ $# -gt 0 && $1 != -* ]]; do
-                    stop_list+=("$1")
+                    # Check to see if the input is a group
+                    local check="${custom_groups["$1"]}"
+                    if [[ ${#check} -gt 1 ]]; then
+                        local add_services=$(_csv_to_array "${custom_groups["$1"]}")
+                        for services in $add_services; do
+                            stop_list+=("$services")
+                        done
+                    else
+                        stop_list+=("$1")
+                    fi
                     shift
                 done
+
                 if [[ ${#stop_list[@]} -eq 0 ]]; then
                     for arg in $compose_list; do
                         docker compose -f $arg stop
@@ -204,7 +219,16 @@ dstop() {
             -d)
                 shift
                 while [[ $# -gt 0 && $1 != -* ]]; do
-                    down_list+=("$1")
+                    # Check to see if the input is a group
+                    local check="${custom_groups["$1"]}"
+                    if [[ ${#check} -gt 1 ]]; then
+                        local add_services=$(_csv_to_array "${custom_groups["$1"]}")
+                        for services in $add_services; do
+                        down_list+=("$services")
+                        done
+                    else
+                        down_list+=("$1")
+                    fi
                     shift
                 done
                 if [[ ${#down_list[@]} -eq 0 ]]; then
