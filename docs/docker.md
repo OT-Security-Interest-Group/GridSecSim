@@ -99,7 +99,7 @@ A **Dockerfile** defines how an image is built. Common instructions:
 - `RUN <command>` — Execute a command at build time (e.g., install packages).  
 - `EXPOSE <port>` — Document the port the app runs on (doesn’t publish it).  
 - `CMD ["executable", "param1"]` — Default command run when container starts.  
-- `ENTRYPOINT ["executable", "param1"]` — Like CMD, but arguments passed to `docker run` are appended.  
+- `ENTRYPOINT ["executable", "param1"]` — Like CMD, but arguments passed to `docker run` are appended.
 
 **Example Dockerfile:**
 ```dockerfile
@@ -116,34 +116,67 @@ CMD ["node", "server.js"]
 
 ## Docker Compose
 
-A **docker-compose.yml** defines and manages multi-container applications.  
+A **docker-compose.yml** defines and manages multi-container applications we will be using this often.
 
-### Docker Sections
 
-#### services
-This is where you define the options for each of the containers in the compose 
+### services
+This is where you define the options for each of the containers in the compose. Not all of these are required as these are all the options you can configure if wanted.
 
-##### image
-use this option when you are using a prebuilt image like pulling one from docker hub.
+#### image
+use this option when you are using a prebuilt image like pulling one from docker hub. Don't use this option if we have a docker file for the service/container.
 
-##### build
+```yaml
+services:
+  example:
+    image: <pre-built-image>:<tag>
+```
+
+#### build
 This is for building the docker image yourself with a docker file
 - **context**: The path to the build context.
 - **dockerfile**: The name of the Dockerfile.
 - **args**: Build arguments to pass to the Dockerfile.
-- **target**: The target stage to build in a multi-stage Dockerfile.
 
-##### command and entrypoint
+```yaml
+services:
+  example:
+    build:
+      context: <Path to context>
+      dockerfile: <Path to dockerfile from from context>
+      args:
+        <Arg defined in dockerflie>: <Value you want to set arg>
+        <More args if they exist>: <Value for this arg>
+```
+
+#### command and entrypoint
 These two options are for overriding the default operation inside the image.
 - **command**: Overrides the default command specified in the image.
 - **entrypoint**: Overrides the default entrypoint specified in the image.
 
-##### Environment Variables
+```yaml
+services:
+  example:
+    # The entrypoint is what is going to get called everytime container starts
+    entrypoint: ["/usr/local/bin/my_entrypoint.sh"]
+    # Command passes arguments to the entrypoint
+    command: ["start_server", "--port", "8000"]
+```
+
+#### Environment Variables
 These are for setting the env options that are built into docker images
 - **environment**: Sets environment variables within the service container.
 - **env_file**: Specifies a file containing environment variables to load.
 
-##### Ports and Networking
+```yaml
+services:
+  example:
+    environment:
+      <ENV-in-dockerfile>: "<value>"
+      <env-in-dockerfile>: "<value>"
+
+```
+
+#### Ports and Networking
 This is where the network options for the container are defined
 - **ports**: Maps ports between the host and the container.
 - **expose**: Exposes ports to linked services without publishing them to the host.
@@ -151,28 +184,80 @@ This is where the network options for the container are defined
   - **aliases**: Defines network aliases for the service within a network.
   - **ipv4_address/ipv6_address**: Assigns a static IP address to the service within a network.
 
+```yaml
+services:
+  example:
+    networks:
+      <network-name>:
+        ipv4_address: <Address>
+        # We don't use aliases that often
+        aliases:
+          - <alias>
+          - <another alias>
+    ports:
+      - <host-port>:<container-port>
+      - <host-port>:<container-port>
+    expose:
+      - <internal-container-port>
+```
 
-##### Volumes and Data Persistence
+#### Volumes and Data Persistence
 Mainly these are just volumes that act as a permanent storage outisde of the container
 - **volumes**: Mounts host paths or named volumes into the container for data persistence.
-- **tmpfs**: Mounts a temporary filesystem into the container.
 
-##### Dependencies and Relationships
+```yaml
+services:
+  example:
+    volumes:
+      - <local folder>:<Location in container>
+      - <named volume in volume section>:<location in container>
+```
+
+#### Dependencies and Relationships
 Here you can define if a service needs another to run
 - **depends_on**: Defines dependencies between services, ensuring services start in a specific order.
 
+```yaml
+services:
+  example:
+    depends_on:
+      - <other service in the compose>
+```
 
-##### Restart Policies
+#### Restart Policies
 This only has the one option for defining how you want the container to work on exit/crash
 - **restart**: Configures how containers should restart when they exit/crash (e.g., no, on-failure, always, unless-stopped).
 
+```yaml
+services:
+  example:
+    restart: unless-stopped #Or other state
+```
 
-##### Other Options
+
+#### Other Options
 - **container_name**: Specifies a custom name for the container.
 - **labels**: Adds metadata labels to the service.
-- **privileged**: Grants extended privileges to the container.
+- **privileged**: Grants all extended privileges to the container.
+- **cap_add**: This grants specific privileges to container
 - **working_dir**: Sets the working directory inside the container.
 
+```yaml
+services:
+  example:
+    container_name: example # Or whatever you want
+    privileged: True
+    cap_add:
+      - NET_ADMIN
+      - <Other options>
+    labels:
+      - role=router
+      - <any string without "">
+    working_dir: <path in container>
+
+```
+
+#### Example
 ```yaml
 services:
   web:
@@ -195,7 +280,7 @@ services:
       - app-net
 ```
 
-#### Networking
+### Networking
 The networking section is where the docker network options are defined. If you need to define a network do so in the networking compose file and then for every network needed in the other use the `external: true` option to inform docker that it is defined elsewhere.
 
 ```yaml
@@ -209,17 +294,79 @@ networks:
   site_operations_network:
     external: true
 ```
-#### Volumes
+
+In the networking docker compose there are more options
+- **name**: you need to give the network a name
+- **driver**: This tells docker what network driver to use (we use bridge right now)
+- **ipam**: This is the ip config
+  - **config**: We use this option to define `subnet` and `gateway`. The gateway is docker router which we are not using but they always exist with bridge driver.
+
+```yaml
+networks:
+  enterprise_network:
+    name: enterprise_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24
+          gateway: 192.168.10.250
+
+  idmz_network:
+    name: idmz_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.20.0/24
+          gateway: 192.168.20.250
+```
+
+### Volumes
 Volumes are what allo data to be persistant beyond a container lifetime. There aren't to many options that get used with them often
 
 ```yaml
 volumes:
   db-data:
+  <another-volume-name>:
 ```
 
 ---
+## Terms and Definitions
+### Container
+This is the Docker container after you have completed the build process. The thing that runs.
 
+### service
+This is a term in Docker Compose that means the container. Each service in a compose file is the config for the container
+
+### spin up/down
+This just means turning containers on and off via the compose files.
+
+### entrypoint
+This is what the container will do on startup. So if you give it a specific command or process to run.
+
+### image
+This is like the base of the container with the file system and stuff. Not too important to know the specifics, but just know you need an image for a container. (Docker file creates an image)
+
+
+### Volumes
+These are used for data persistence even after a container is deleted.
+- Data persistence
+- Located on the local filesystem managed by Docker
+- Can be shared across containers
+
+### Bind Mounts
+These allow you to connect specific directories on your local machine to a container.
+- Connect the directory to the container
+- Still defined in the volume section of the compose
+
+### Tags
+These are to `<Image>:<tag>` in an image. `latest` if none is specified
 This file is meant as a **quick-reference**. For deeper dives, see:  
+
+### Ports vs Expose
+Ports allows containers from outside the network like the host to access the service. Expose lets the other containers in the network know about it and allows them to connect.
+
+---
+
 - [Docker Docs](https://docs.docker.com/)  
 - [Docker Compose Reference](https://docs.docker.com/compose/compose-file/)  
 
